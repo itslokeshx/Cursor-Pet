@@ -19,7 +19,7 @@ export interface CursorPetProps extends CursorPetConfig {
   className?: string;
 }
 
-export const DEFAULT_SPRITE_SETS: SpriteSets = {
+export const SPRITE_SETS: SpriteSets = {
   idle: [[-3, -3]],
   alert: [[-7, -3]],
   scratchSelf: [
@@ -82,16 +82,21 @@ export const DEFAULT_SPRITE_SETS: SpriteSets = {
   ],
 };
 
-export const DEFAULT_CONFIG: Required<
-  Omit<CursorPetConfig, 'spriteSets' | 'className'>
-> = {
-  spriteUrl: '/pets/neko.gif',
-  spriteSize: 32,
-  speed: 10,
-  stopDistance: 48,
-  startX: 32,
-  startY: 32,
-  zIndex: 2147483647,
-  respectReducedMotion: true,
-  enabled: true,
-};
+export const DEFAULTS = {
+  SPRITE_URL: "/pets/neko.gif",
+  SPRITE_SIZE: 32,
+  SPEED: 10,
+  STOP_DISTANCE: 48,
+  Z_INDEX: 2147483647,
+  RESPECT_REDUCED_MOTION: true,
+  ENABLED: true,
+  EDGE_MARGIN: 32,
+  HALF_SPRITE: 16,
+  IDLE_THRESHOLD: 2,
+  IDLE_CHANCE: 10,
+  TIRED_FRAMES: 3,
+  SLEEP_DURATION: 192,
+  SCRATCH_DURATION: 9,
+  ALERT_DECAY: 7,
+  FRAME_INTERVAL: 100,
+} as const;

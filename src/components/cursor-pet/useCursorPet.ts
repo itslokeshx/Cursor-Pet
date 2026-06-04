@@ -1,44 +1,46 @@
-import { useCallback, useEffect, useRef } from 'react';
-import {
-  CursorPetConfig,
-  DEFAULT_CONFIG,
-  DEFAULT_SPRITE_SETS,
-  SpriteSets,
-} from './types';
+import { useCallback, useEffect, useRef } from "react";
+import { CursorPetConfig, DEFAULTS, SPRITE_SETS, SpriteSets } from "./types";
+
+function getWindowCenter() {
+  return {
+    x: Math.floor(window.innerWidth / 2),
+    y: Math.floor(window.innerHeight / 2),
+  };
+}
 
 export function useCursorPet(config: CursorPetConfig = {}) {
   const {
-    spriteUrl = DEFAULT_CONFIG.spriteUrl,
-    spriteSize = DEFAULT_CONFIG.spriteSize,
-    speed = DEFAULT_CONFIG.speed,
-    stopDistance = DEFAULT_CONFIG.stopDistance,
+    spriteUrl = DEFAULTS.SPRITE_URL,
+    spriteSize = DEFAULTS.SPRITE_SIZE,
+    speed = DEFAULTS.SPEED,
+    stopDistance = DEFAULTS.STOP_DISTANCE,
     startX,
     startY,
-    respectReducedMotion = DEFAULT_CONFIG.respectReducedMotion,
-    enabled = DEFAULT_CONFIG.enabled,
+    respectReducedMotion = DEFAULTS.RESPECT_REDUCED_MOTION,
+    enabled = DEFAULTS.ENABLED,
     spriteSets: customSpriteSets,
   } = config;
 
   const petRef = useRef<HTMLDivElement>(null);
 
-  const centerX = typeof startX === 'number' ? startX : Math.floor(window.innerWidth / 2);
-  const centerY = typeof startY === 'number' ? startY : Math.floor(window.innerHeight / 2);
+  const initCenter = getWindowCenter();
+  const initialX = typeof startX === "number" ? startX : initCenter.x;
+  const initialY = typeof startY === "number" ? startY : initCenter.y;
 
   const state = useRef({
-    nekoPosX: centerX,
-    nekoPosY: centerY,
-    mousePosX: centerX,
-    mousePosY: centerY,
+    nekoPosX: initialX,
+    nekoPosY: initialY,
+    mousePosX: initialX,
+    mousePosY: initialY,
     frameCount: 0,
     idleTime: 0,
     idleAnimation: null as string | null,
     idleAnimationFrame: 0,
     lastFrameTimestamp: 0,
-    hasMoved: false,
   });
 
   const spriteSets: SpriteSets = {
-    ...DEFAULT_SPRITE_SETS,
+    ...SPRITE_SETS,
     ...customSpriteSets,
   };
 
@@ -50,7 +52,7 @@ export function useCursorPet(config: CursorPetConfig = {}) {
       const sprite = spriteSets[name][frame % spriteSets[name].length];
       el.style.backgroundPosition = `${sprite[0] * spriteSize}px ${sprite[1] * spriteSize}px`;
     },
-    [spriteSize, spriteSets]
+    [spriteSize, spriteSets],
   );
 
   const resetIdleAnimation = useCallback(() => {
@@ -63,41 +65,45 @@ export function useCursorPet(config: CursorPetConfig = {}) {
     s.idleTime += 1;
 
     if (
-      s.idleTime > 2 &&
-      Math.floor(Math.random() * 10) === 0 &&
+      s.idleTime > DEFAULTS.IDLE_THRESHOLD &&
+      Math.floor(Math.random() * DEFAULTS.IDLE_CHANCE) === 0 &&
       s.idleAnimation === null
     ) {
-      const available: string[] = ['sleeping', 'scratchSelf'];
+      const available: string[] = ["sleeping", "scratchSelf"];
 
-      if (s.nekoPosX < 32) available.push('scratchWallW');
-      if (s.nekoPosY < 32) available.push('scratchWallN');
-      if (s.nekoPosX > window.innerWidth - 32) available.push('scratchWallE');
-      if (s.nekoPosY > window.innerHeight - 32) available.push('scratchWallS');
+      if (s.nekoPosX < DEFAULTS.EDGE_MARGIN) available.push("scratchWallW");
+      if (s.nekoPosY < DEFAULTS.EDGE_MARGIN) available.push("scratchWallN");
+      if (s.nekoPosX > window.innerWidth - DEFAULTS.EDGE_MARGIN)
+        available.push("scratchWallE");
+      if (s.nekoPosY > window.innerHeight - DEFAULTS.EDGE_MARGIN)
+        available.push("scratchWallS");
 
       s.idleAnimation = available[Math.floor(Math.random() * available.length)];
     }
 
     switch (s.idleAnimation) {
-      case 'sleeping':
-        if (s.idleAnimationFrame < 3) {
-          setSprite('tired', 0);
+      case "sleeping":
+        if (s.idleAnimationFrame < DEFAULTS.TIRED_FRAMES) {
+          setSprite("tired", 0);
           break;
         }
-        setSprite('sleeping', Math.floor(s.idleAnimationFrame / 4));
-        if (s.idleAnimationFrame > 192) resetIdleAnimation();
+        setSprite("sleeping", Math.floor(s.idleAnimationFrame / 4));
+        if (s.idleAnimationFrame > DEFAULTS.SLEEP_DURATION)
+          resetIdleAnimation();
         break;
 
-      case 'scratchWallN':
-      case 'scratchWallS':
-      case 'scratchWallE':
-      case 'scratchWallW':
-      case 'scratchSelf':
+      case "scratchWallN":
+      case "scratchWallS":
+      case "scratchWallE":
+      case "scratchWallW":
+      case "scratchSelf":
         setSprite(s.idleAnimation, s.idleAnimationFrame);
-        if (s.idleAnimationFrame > 9) resetIdleAnimation();
+        if (s.idleAnimationFrame > DEFAULTS.SCRATCH_DURATION)
+          resetIdleAnimation();
         break;
 
       default:
-        setSprite('idle', 0);
+        setSprite("idle", 0);
         return;
     }
 
@@ -124,27 +130,33 @@ export function useCursorPet(config: CursorPetConfig = {}) {
     s.idleAnimationFrame = 0;
 
     if (s.idleTime > 1) {
-      setSprite('alert', 0);
-      s.idleTime = Math.min(s.idleTime, 7);
+      setSprite("alert", 0);
+      s.idleTime = Math.min(s.idleTime, DEFAULTS.ALERT_DECAY);
       s.idleTime -= 1;
       return;
     }
 
-    let direction = '';
-    direction += diffY / distance > 0.5 ? 'N' : '';
-    direction += diffY / distance < -0.5 ? 'S' : '';
-    direction += diffX / distance > 0.5 ? 'W' : '';
-    direction += diffX / distance < -0.5 ? 'E' : '';
+    let direction = "";
+    direction += diffY / distance > 0.5 ? "N" : "";
+    direction += diffY / distance < -0.5 ? "S" : "";
+    direction += diffX / distance > 0.5 ? "W" : "";
+    direction += diffX / distance < -0.5 ? "E" : "";
     setSprite(direction, s.frameCount);
 
     s.nekoPosX -= (diffX / distance) * speed;
     s.nekoPosY -= (diffY / distance) * speed;
 
-    s.nekoPosX = Math.min(Math.max(16, s.nekoPosX), window.innerWidth - 16);
-    s.nekoPosY = Math.min(Math.max(16, s.nekoPosY), window.innerHeight - 16);
+    s.nekoPosX = Math.min(
+      Math.max(DEFAULTS.HALF_SPRITE, s.nekoPosX),
+      window.innerWidth - DEFAULTS.HALF_SPRITE,
+    );
+    s.nekoPosY = Math.min(
+      Math.max(DEFAULTS.HALF_SPRITE, s.nekoPosY),
+      window.innerHeight - DEFAULTS.HALF_SPRITE,
+    );
 
-    el.style.left = `${s.nekoPosX - 16}px`;
-    el.style.top = `${s.nekoPosY - 16}px`;
+    el.style.left = `${s.nekoPosX - DEFAULTS.HALF_SPRITE}px`;
+    el.style.top = `${s.nekoPosY - DEFAULTS.HALF_SPRITE}px`;
   }, [speed, stopDistance, idle, setSprite]);
 
   useEffect(() => {
@@ -152,7 +164,7 @@ export function useCursorPet(config: CursorPetConfig = {}) {
 
     if (
       respectReducedMotion &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
       return;
     }
@@ -160,8 +172,9 @@ export function useCursorPet(config: CursorPetConfig = {}) {
     const el = petRef.current;
     if (!el) return;
 
-    const initX = typeof startX === 'number' ? startX : Math.floor(window.innerWidth / 2);
-    const initY = typeof startY === 'number' ? startY : Math.floor(window.innerHeight / 2);
+    const center = getWindowCenter();
+    const initX = typeof startX === "number" ? startX : center.x;
+    const initY = typeof startY === "number" ? startY : center.y;
 
     state.current.nekoPosX = initX;
     state.current.nekoPosY = initY;
@@ -170,20 +183,19 @@ export function useCursorPet(config: CursorPetConfig = {}) {
 
     el.style.width = `${spriteSize}px`;
     el.style.height = `${spriteSize}px`;
-    el.style.position = 'fixed';
-    el.style.pointerEvents = 'none';
-    el.style.imageRendering = 'pixelated';
-    el.style.left = `${initX - 16}px`;
-    el.style.top = `${initY - 16}px`;
+    el.style.position = "fixed";
+    el.style.pointerEvents = "none";
+    el.style.imageRendering = "pixelated";
+    el.style.left = `${initX - DEFAULTS.HALF_SPRITE}px`;
+    el.style.top = `${initY - DEFAULTS.HALF_SPRITE}px`;
     el.style.backgroundImage = `url(${spriteUrl})`;
 
     const handleMouseMove = (e: MouseEvent) => {
       state.current.mousePosX = e.clientX;
       state.current.mousePosY = e.clientY;
-      state.current.hasMoved = true;
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener("mousemove", handleMouseMove);
 
     let animationId: number;
 
@@ -194,7 +206,10 @@ export function useCursorPet(config: CursorPetConfig = {}) {
         state.current.lastFrameTimestamp = timestamp;
       }
 
-      if (timestamp - state.current.lastFrameTimestamp > 100) {
+      if (
+        timestamp - state.current.lastFrameTimestamp >
+        DEFAULTS.FRAME_INTERVAL
+      ) {
         state.current.lastFrameTimestamp = timestamp;
         frame();
       }
@@ -205,10 +220,18 @@ export function useCursorPet(config: CursorPetConfig = {}) {
     animationId = window.requestAnimationFrame(onAnimationFrame);
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener("mousemove", handleMouseMove);
       window.cancelAnimationFrame(animationId);
     };
-  }, [enabled, respectReducedMotion, spriteSize, spriteUrl, startX, startY, frame]);
+  }, [
+    enabled,
+    respectReducedMotion,
+    spriteSize,
+    spriteUrl,
+    startX,
+    startY,
+    frame,
+  ]);
 
   return petRef;
 }

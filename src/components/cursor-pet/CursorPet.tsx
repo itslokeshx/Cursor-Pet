@@ -1,10 +1,10 @@
-import { CursorPetProps, DEFAULT_CONFIG } from './types';
-import { useCursorPet } from './useCursorPet';
+import { CursorPetProps, DEFAULTS } from "./types";
+import { useCursorPet } from "./useCursorPet";
 
 export function CursorPet({
   className,
-  zIndex = DEFAULT_CONFIG.zIndex,
-  enabled = DEFAULT_CONFIG.enabled,
+  zIndex = DEFAULTS.Z_INDEX,
+  enabled = DEFAULTS.ENABLED,
   ...config
 }: CursorPetProps) {
   const petRef = useCursorPet({ enabled, ...config });
