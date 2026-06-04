@@ -39,10 +39,10 @@ export function useCursorPet(config: CursorPetConfig = {}) {
     lastFrameTimestamp: 0,
   });
 
-  const spriteSets: SpriteSets = {
+  const spriteSets = {
     ...SPRITE_SETS,
     ...customSpriteSets,
-  };
+  } as SpriteSets;
 
   const setSprite = useCallback(
     (name: string, frame: number) => {
