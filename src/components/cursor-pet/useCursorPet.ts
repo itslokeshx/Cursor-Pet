@@ -194,7 +194,7 @@ export function useCursorPet(config: CursorPetConfig = {}) {
         state.current.lastFrameTimestamp = timestamp;
       }
 
-      if (timestamp - state.current.lastFrameTimestamp > 75) {
+      if (timestamp - state.current.lastFrameTimestamp > 100) {
         state.current.lastFrameTimestamp = timestamp;
         frame();
       }
