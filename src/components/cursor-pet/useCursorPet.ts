@@ -12,8 +12,8 @@ export function useCursorPet(config: CursorPetConfig = {}) {
     spriteSize = DEFAULT_CONFIG.spriteSize,
     speed = DEFAULT_CONFIG.speed,
     stopDistance = DEFAULT_CONFIG.stopDistance,
-    startX = DEFAULT_CONFIG.startX,
-    startY = DEFAULT_CONFIG.startY,
+    startX,
+    startY,
     respectReducedMotion = DEFAULT_CONFIG.respectReducedMotion,
     enabled = DEFAULT_CONFIG.enabled,
     spriteSets: customSpriteSets,
@@ -21,16 +21,20 @@ export function useCursorPet(config: CursorPetConfig = {}) {
 
   const petRef = useRef<HTMLDivElement>(null);
 
+  const centerX = typeof startX === 'number' ? startX : Math.floor(window.innerWidth / 2);
+  const centerY = typeof startY === 'number' ? startY : Math.floor(window.innerHeight / 2);
+
   const state = useRef({
-    nekoPosX: startX,
-    nekoPosY: startY,
-    mousePosX: 0,
-    mousePosY: 0,
+    nekoPosX: centerX,
+    nekoPosY: centerY,
+    mousePosX: centerX,
+    mousePosY: centerY,
     frameCount: 0,
     idleTime: 0,
     idleAnimation: null as string | null,
     idleAnimationFrame: 0,
     lastFrameTimestamp: 0,
+    hasMoved: false,
   });
 
   const spriteSets: SpriteSets = {
@@ -59,8 +63,8 @@ export function useCursorPet(config: CursorPetConfig = {}) {
     s.idleTime += 1;
 
     if (
-      s.idleTime > 10 &&
-      Math.floor(Math.random() * 200) === 0 &&
+      s.idleTime > 2 &&
+      Math.floor(Math.random() * 10) === 0 &&
       s.idleAnimation === null
     ) {
       const available: string[] = ['sleeping', 'scratchSelf'];
@@ -75,7 +79,7 @@ export function useCursorPet(config: CursorPetConfig = {}) {
 
     switch (s.idleAnimation) {
       case 'sleeping':
-        if (s.idleAnimationFrame < 8) {
+        if (s.idleAnimationFrame < 3) {
           setSprite('tired', 0);
           break;
         }
@@ -156,18 +160,27 @@ export function useCursorPet(config: CursorPetConfig = {}) {
     const el = petRef.current;
     if (!el) return;
 
+    const initX = typeof startX === 'number' ? startX : Math.floor(window.innerWidth / 2);
+    const initY = typeof startY === 'number' ? startY : Math.floor(window.innerHeight / 2);
+
+    state.current.nekoPosX = initX;
+    state.current.nekoPosY = initY;
+    state.current.mousePosX = initX;
+    state.current.mousePosY = initY;
+
     el.style.width = `${spriteSize}px`;
     el.style.height = `${spriteSize}px`;
     el.style.position = 'fixed';
     el.style.pointerEvents = 'none';
     el.style.imageRendering = 'pixelated';
-    el.style.left = `${startX - 16}px`;
-    el.style.top = `${startY - 16}px`;
+    el.style.left = `${initX - 16}px`;
+    el.style.top = `${initY - 16}px`;
     el.style.backgroundImage = `url(${spriteUrl})`;
 
     const handleMouseMove = (e: MouseEvent) => {
       state.current.mousePosX = e.clientX;
       state.current.mousePosY = e.clientY;
+      state.current.hasMoved = true;
     };
 
     document.addEventListener('mousemove', handleMouseMove);
@@ -181,7 +194,7 @@ export function useCursorPet(config: CursorPetConfig = {}) {
         state.current.lastFrameTimestamp = timestamp;
       }
 
-      if (timestamp - state.current.lastFrameTimestamp > 100) {
+      if (timestamp - state.current.lastFrameTimestamp > 75) {
         state.current.lastFrameTimestamp = timestamp;
         frame();
       }
