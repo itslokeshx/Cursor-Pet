@@ -57,8 +57,8 @@ Then import and use `<CursorPet />` anywhere.
 | `spriteSize`           | `number`  | `32`               | Size of each sprite frame in px          |
 | `speed`                | `number`  | `10`               | Movement speed in px/frame               |
 | `stopDistance`          | `number`  | `48`               | Distance (px) at which pet stops chasing |
-| `startX`               | `number`  | `32`               | Initial X position                       |
-| `startY`               | `number`  | `32`               | Initial Y position                       |
+| `startX`               | `number`  | viewport center    | Initial X position                       |
+| `startY`               | `number`  | viewport center    | Initial Y position                       |
 | `zIndex`               | `number`  | `2147483647`       | CSS z-index                              |
 | `respectReducedMotion` | `boolean` | `true`             | Respect `prefers-reduced-motion`         |
 | `enabled`              | `boolean` | `true`             | Toggle the pet on/off                    |
@@ -79,6 +79,115 @@ function MyComponent() {
 ```
 
 Returns a `ref` you attach to any element. The hook handles all animation logic internally.
+
+---
+
+## Configuration Guide
+
+### Change Starting Position
+
+By default the pet spawns at the **center of the screen**. Pass `startX` and `startY` to override:
+
+```tsx
+// Top-left corner
+<CursorPet startX={32} startY={32} />
+
+// Bottom-right area
+<CursorPet startX={window.innerWidth - 50} startY={window.innerHeight - 50} />
+
+// Fixed position
+<CursorPet startX={200} startY={400} />
+```
+
+### Change Size
+
+`spriteSize` controls the frame size of the sprite sheet. Make sure your sprite sheet frames match this value:
+
+```tsx
+// Default (32×32 pixels per frame)
+<CursorPet spriteSize={32} />
+
+// Larger sprite sheet with 48×48 frames
+<CursorPet spriteUrl="/pets/large-cat.gif" spriteSize={48} />
+
+// Smaller 16×16 sprite
+<CursorPet spriteUrl="/pets/tiny-cat.gif" spriteSize={16} />
+```
+
+### Change Speed
+
+`speed` is how many pixels the pet moves per animation frame. Higher = faster:
+
+```tsx
+// Slow and relaxed
+<CursorPet speed={5} />
+
+// Default
+<CursorPet speed={10} />
+
+// Fast and energetic
+<CursorPet speed={20} />
+```
+
+### Change Stop Distance
+
+`stopDistance` is how close (in px) the pet gets to the cursor before it stops and goes idle:
+
+```tsx
+// Stops right at the cursor
+<CursorPet stopDistance={16} />
+
+// Default — stops a bit away
+<CursorPet stopDistance={48} />
+
+// Keeps its distance
+<CursorPet stopDistance={100} />
+```
+
+### Change Z-Index
+
+Control stacking order if the pet gets hidden behind other elements:
+
+```tsx
+// Default — sits on top of everything
+<CursorPet zIndex={2147483647} />
+
+// Behind modals
+<CursorPet zIndex={100} />
+```
+
+### Toggle On/Off
+
+Conditionally enable or disable the pet:
+
+```tsx
+const [showPet, setShowPet] = useState(true);
+
+<button onClick={() => setShowPet(!showPet)}>Toggle Pet</button>
+<CursorPet enabled={showPet} />
+```
+
+### Disable for Reduced Motion
+
+By default the pet respects `prefers-reduced-motion`. To override:
+
+```tsx
+// Always animate regardless of OS setting
+<CursorPet respectReducedMotion={false} />
+```
+
+### Combine Multiple Options
+
+```tsx
+<CursorPet
+  speed={8}
+  stopDistance={30}
+  startX={100}
+  startY={100}
+  spriteSize={32}
+  zIndex={9999}
+/>
+```
 
 ---
 
