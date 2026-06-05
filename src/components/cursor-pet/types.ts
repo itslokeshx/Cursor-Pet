@@ -85,7 +85,7 @@ export const SPRITE_SETS: SpriteSets = {
 export const DEFAULTS = {
   SPRITE_URL: "/pets/neko.gif",
   SPRITE_SIZE: 32,
-  SPEED: 10,
+  SPEED: 30,
   STOP_DISTANCE: 48,
   Z_INDEX: 2147483647,
   RESPECT_REDUCED_MOTION: true,
