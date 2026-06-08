@@ -2,7 +2,7 @@
 
 A cute, configurable cursor-following pet for React apps. Drop it in and a little cat chases your cursor around the screen.
 
-**[Live Demo](https://cursor-pet.vercel.app/)**
+**[Live Link](https://cursor-pet.vercel.app/)**
 
 ![MIT License](https://img.shields.io/badge/license-MIT-blue)
 
