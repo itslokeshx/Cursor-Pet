@@ -12,7 +12,7 @@ A cute, configurable cursor-following pet for React apps. Drop it in and a littl
 
 <div align="center">
 
-![Cursor Pet Demo](assets/preview.gif)
+<img src="./assets/preview.gif" width="100%" alt="Coding GIF" />
 
 *Move your cursor around and watch the little cat chase it!*
 
