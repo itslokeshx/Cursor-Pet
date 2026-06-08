@@ -12,13 +12,11 @@ A cute, configurable cursor-following pet for React apps. Drop it in and a littl
 
 <div align="center">
 
-<video src="assets/preview.mp4" width="600" autoplay loop muted playsinline>
-  Your browser does not support the video tag.
-</video>
+![Cursor Pet Demo](assets/preview.gif)
+
+*Move your cursor around and watch the little cat chase it!*
 
 </div>
-
-> Move your cursor around and watch the little cat chase it!
 
 ---
 
